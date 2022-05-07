@@ -4,30 +4,28 @@ import {
     InternalServerErrorException,
 } from '@nestjs/common';
 import {User} from "../entities/user.entity";
-import {AuthSignUpDto} from "../api/auth/dto/AuthSignUpDto";
+import {AuthSignUpDto} from "../auth/dto/AuthSignUpDto";
 import * as bcrypt from 'bcrypt';
-import {AuthSignUpDtoResponse} from "../api/auth/dto/AuthSignUpDtoResponse";
-import {AuthSignInDto} from "../api/auth/dto/AuthSignInDto";
-import {AuthSignInDtoResponse} from "../api/auth/dto/AuthSignInDtoResponse";
+import {AuthSignUpDtoResponse} from "../auth/dto/AuthSignUpDtoResponse";
+import {AuthSignInDto} from "../auth/dto/AuthSignInDto";
+import {AuthSignInDtoResponse} from "../auth/dto/AuthSignInDtoResponse";
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
     async register(authSignUpDto: AuthSignUpDto): Promise<AuthSignUpDtoResponse> {
-        const { name , email, password } = authSignUpDto;
-
+        const { name , email, password,role} = authSignUpDto;
         const user = new User();
         //random salt and encrypting password
         user.salt = await bcrypt.genSalt();
         user.email = email;
         user.password = await this.hashPassword(password, user.salt);;
         user.name = name;
-
-
+        user.role = role;
         try {
             let  res = await user.save();
             return this.userToAuthSignUpDtoResponse(res);
         } catch (error) {
-            if (error.code === '23505') {
+            if (error.code === '1062') {
                 throw new ConflictException('Email already exists');
             } else {
                 throw new InternalServerErrorException();
@@ -43,6 +41,7 @@ export class UserRepository extends Repository<User> {
         userResponse.id= res.id;
         userResponse.name= res.name;
         userResponse.email= res.email;
+        userResponse.role = res.role;
         return userResponse;
     }
 
@@ -57,6 +56,7 @@ export class UserRepository extends Repository<User> {
             userResponse.name = user.name;
             userResponse.email = user.email;
             userResponse.id = user.id;
+            userResponse.role = user.role;
             return userResponse;
         } else {
             return null;
