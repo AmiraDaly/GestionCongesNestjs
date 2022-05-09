@@ -1,6 +1,16 @@
 
-import {Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, BaseEntity, Unique} from 'typeorm';
+import {
+    Entity,
+    PrimaryGeneratedColumn,
+    Column,
+    CreateDateColumn,
+    UpdateDateColumn,
+    BaseEntity,
+    Unique,
+    OneToMany
+} from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import {Conges} from "./conges.entity";
 
 
 export enum UserRoleEnum {
@@ -28,16 +38,24 @@ export class User extends BaseEntity{
     @Column()
     salt: string;
 
+    // @OneToMany(() => Conges, (conges) => conges.user, {}) ;
+
     @Column({
         type: 'enum',
         enum: UserRoleEnum,
         default: UserRoleEnum.user,
     })
     role: UserRoleEnum;
-
+    @OneToMany(() => Conges, conges => conges.user)
+    conges: Conges[];
     //validating incoming password with password in the database
     async validatePassword(password: string):Promise<boolean> {
         const hash = await bcrypt.hash(password, this.salt);
         return hash === this.password;
     }
+    @Column()
+    soldeannuel: number;
+
+    @Column()
+    nbrjourpris: number;
 }

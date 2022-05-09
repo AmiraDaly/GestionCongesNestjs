@@ -29,4 +29,14 @@ export class UserService {
     async findUserByEmail(email: string): Promise<User> {
         return this.repository.findOne({ email });
     }
+
+public async  updateUserNbrJourpris(id:number, soldepris:number)
+{
+    await this.repository.save({
+        id: id,
+        nbrjourpris: soldepris
+    });
+}
+
+
 }

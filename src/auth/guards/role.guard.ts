@@ -11,7 +11,6 @@ export class RoleGuard implements CanActivate  {
   ): boolean | Promise<boolean> | Observable<boolean> {
     const allContext = [context.getClass(), context.getHandler()];
     const roles = this.reflector.getAllAndMerge('roles', allContext);
-    console.log('eeeeeeeeeeee ', roles)
     if (roles.length == 0) {
       return true;
     }

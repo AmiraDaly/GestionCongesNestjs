@@ -5,6 +5,7 @@ import {getEnvPath} from './common/helper/env.helper';
 import {TypeOrmConfigService} from './shared/typeorm/typeorm.service';
 import {AuthModule} from "./auth/auth.module";
 import {UserModule} from "./user/user.module";
+import { CongesModule } from './conges/conges.module';
 
 const envFilePath: string = getEnvPath(`${__dirname}/common/envs`);
 
@@ -14,6 +15,7 @@ const envFilePath: string = getEnvPath(`${__dirname}/common/envs`);
         TypeOrmModule.forRootAsync({useClass: TypeOrmConfigService}),
         AuthModule,
         UserModule,
+        CongesModule,
 
     ],
     controllers: [],

@@ -21,6 +21,8 @@ export class UserRepository extends Repository<User> {
         user.password = await this.hashPassword(password, user.salt);;
         user.name = name;
         user.role = role;
+        user.soldeannuel=23;
+        user.nbrjourpris=0;
         try {
             let  res = await user.save();
             return this.userToAuthSignUpDtoResponse(res);
@@ -42,6 +44,8 @@ export class UserRepository extends Repository<User> {
         userResponse.name= res.name;
         userResponse.email= res.email;
         userResponse.role = res.role;
+        userResponse.soldeannuel = res.soldeannuel;
+        userResponse.nbrjourpris = res.nbrjourpris;
         return userResponse;
     }
 
