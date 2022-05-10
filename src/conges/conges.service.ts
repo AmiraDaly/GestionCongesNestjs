@@ -43,7 +43,7 @@ export class CongesService {
         congesTosave.user = currentUser;
         // save entity to DB
         const res: Conges = await this.repository.save(congesTosave);
-        // reduire le solde congé : appel fonction updateuser
+        // reduire le soldeConges congé : appel fonction updateuser
 
          await this.userService.updateUserNbrJourpris(currentUser.id, nbjour+currentUser.nbrjourpris);
 

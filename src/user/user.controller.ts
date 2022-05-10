@@ -4,6 +4,7 @@ import { UserService } from './user.service';
 import {AuthGuard} from "@nestjs/passport";
 import {RoleGuard} from "../auth/guards/role.guard";
 import {Roles} from "../auth/decorators/role.decorator";
+import {SoldeCongesDto} from "./dto/SoldeCongesDto";
 
 
 
@@ -25,5 +26,17 @@ export class UserController {
     }
 
 
+    @Get('/soldeConges/:id')
+    @UseGuards(AuthGuard('jwt'))
+    @Roles('user')
+    @UseGuards(RoleGuard)
+    public getSoldeConges(@Param('id', ParseIntPipe) id: number
+    ): Promise<SoldeCongesDto> {
+        return this.service.getSoldeConges(id);
+    }
+
+
+
 
 }
+

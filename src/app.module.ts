@@ -7,6 +7,7 @@ import {AuthModule} from "./auth/auth.module";
 import {UserModule} from "./user/user.module";
 import { CongesModule } from './conges/conges.module';
 
+
 const envFilePath: string = getEnvPath(`${__dirname}/common/envs`);
 
 @Module({
@@ -16,6 +17,7 @@ const envFilePath: string = getEnvPath(`${__dirname}/common/envs`);
         AuthModule,
         UserModule,
         CongesModule,
+
 
     ],
     controllers: [],
