@@ -1,7 +1,7 @@
 import {BadRequestException, Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
-import {Conges} from '../entities/conges.entity';
+import {Conges, EtatCongesEnum} from '../entities/conges.entity';
 import {DemandeCongesDto} from "./dto/demande-conges.dto";
 import {DemandeCongesResponseDto} from "./dto/demande-conges-response.dto";
 import {User} from "../entities/user.entity";
@@ -11,15 +11,14 @@ import {UserService} from "../user/user.service";
 export class CongesService {
     @InjectRepository(Conges)
     private readonly repository: Repository<Conges>;
+
     constructor(
         private userService: UserService,
-    ) {}
-
-
+    ) {
+    }
 
 
     public async demandeConges(body: DemandeCongesDto, currentUser: User): Promise<DemandeCongesResponseDto> {
-        console.log('rrrrrrrrrr ', currentUser);
         // dto to entity
         let nbjour: number = 0;
         let d1 = new Date(body.dateRetour).getTime();
@@ -31,7 +30,7 @@ export class CongesService {
         }
         if (nbjour > currentUser.soldeannuel) {
             const msg = 'Erreur : Solde insuffisant , il vous reste (jours)' + currentUser.soldeannuel.toString();
-                throw new BadRequestException(msg);
+            throw new BadRequestException(msg);
         }
         const congesTosave: Conges = new Conges();
 
@@ -45,7 +44,7 @@ export class CongesService {
         const res: Conges = await this.repository.save(congesTosave);
         // reduire le soldeConges congé : appel fonction updateuser
 
-         await this.userService.updateUserNbrJourpris(currentUser.id, nbjour+currentUser.nbrjourpris);
+        await this.userService.updateUserNbrJourpris(currentUser.id, nbjour + currentUser.nbrjourpris);
 
         return this.mappingEntityToDemandeCongesResponseDtoTo(res)
 
@@ -64,4 +63,41 @@ export class CongesService {
         return retour;
     }
 
+    public async validateDemandeConges(id: number) {
+        const demandeConges: Conges = await this.repository.findOne(id);
+        demandeConges.etat = EtatCongesEnum.valide;
+        await this.repository.save(demandeConges)
+        return this.mappingEntityToDemandeCongesResponseDtoTo(demandeConges);
+    }
+
+    public async CancelDemandeConges(id: number, currentUser: User) {
+        const demandeConges: Conges = await this.repository.findOne(id);
+        demandeConges.etat = EtatCongesEnum.annule;
+        await this.repository.save(demandeConges)
+        await this.userService.updateUserNbrJourpris(currentUser.id, currentUser.nbrjourpris - demandeConges.nbJourConges);
+        return this.mappingEntityToDemandeCongesResponseDtoTo(demandeConges);
+    }
+
+    public async getListCongesForCurrentUser(currentUser: User) {
+        let response: DemandeCongesResponseDto[] = new Array();
+        let res: Conges[] = await this.repository.find({where: {user: currentUser.id}});
+        for (const element of res) {
+            let resp: DemandeCongesResponseDto = await this.mappingEntityToDemandeCongesResponseDtoTo(element);
+            response.push(resp);
+        }
+        return response;
+
+    }
+
+    public async getListConges() {
+        let response: DemandeCongesResponseDto[] =  new Array();
+        let res: Conges[] =   await this.repository.find();
+        for (const element of res) {
+            let resp: DemandeCongesResponseDto = await this.mappingEntityToDemandeCongesResponseDtoTo(element);
+            response.push(resp);
+        }
+        return response;
+
+    }
 }
+

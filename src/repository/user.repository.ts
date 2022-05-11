@@ -1,9 +1,6 @@
-import { Repository, EntityRepository } from 'typeorm';
-import {
-    ConflictException,
-    InternalServerErrorException,
-} from '@nestjs/common';
-import {User} from "../entities/user.entity";
+import {EntityRepository, Repository} from 'typeorm';
+import {ConflictException, InternalServerErrorException,} from '@nestjs/common';
+import {User, UserRoleEnum} from "../entities/user.entity";
 import {AuthSignUpDto} from "../auth/dto/AuthSignUpDto";
 import * as bcrypt from 'bcrypt';
 import {AuthSignUpDtoResponse} from "../auth/dto/AuthSignUpDtoResponse";
@@ -13,18 +10,24 @@ import {AuthSignInDtoResponse} from "../auth/dto/AuthSignInDtoResponse";
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
     async register(authSignUpDto: AuthSignUpDto): Promise<AuthSignUpDtoResponse> {
-        const { name , email, password,role} = authSignUpDto;
+        console.log('rrrrrrrrrrrr ', authSignUpDto)
+        const {name, email, password, role} = authSignUpDto;
         const user = new User();
         //random salt and encrypting password
         user.salt = await bcrypt.genSalt();
         user.email = email;
-        user.password = await this.hashPassword(password, user.salt);;
+        user.password = await this.hashPassword(password, user.salt);
+        ;
         user.name = name;
-        user.role = role;
-        user.soldeannuel=23;
-        user.nbrjourpris=0;
+        if (role === 'admin') {
+            user.role = UserRoleEnum.admin;
+        } else {
+            user.role = UserRoleEnum.user;
+        }
+        user.soldeannuel = 23;
+        user.nbrjourpris = 0;
         try {
-            let  res = await user.save();
+            let res = await user.save();
             return this.userToAuthSignUpDtoResponse(res);
         } catch (error) {
             if (error.code === '1062') {
@@ -34,15 +37,17 @@ export class UserRepository extends Repository<User> {
             }
         }
     }
+
     //private method to encrypt password
     private async hashPassword(password: string, salt: string): Promise<string> {
         return bcrypt.hash(password, salt);
     }
-    private userToAuthSignUpDtoResponse(res: User) : AuthSignUpDtoResponse{
+
+    private userToAuthSignUpDtoResponse(res: User): AuthSignUpDtoResponse {
         const userResponse = new AuthSignUpDtoResponse();
-        userResponse.id= res.id;
-        userResponse.name= res.name;
-        userResponse.email= res.email;
+        userResponse.id = res.id;
+        userResponse.name = res.name;
+        userResponse.email = res.email;
         userResponse.role = res.role;
         userResponse.soldeannuel = res.soldeannuel;
         userResponse.nbrjourpris = res.nbrjourpris;
@@ -51,9 +56,9 @@ export class UserRepository extends Repository<User> {
 
     //signIn method to validate user's email and password
     async signIn(authSignInDto: AuthSignInDto): Promise<AuthSignInDtoResponse> {
-        const { email, password } = authSignInDto;
+        const {email, password} = authSignInDto;
 
-        const user = await this.findOne({ email });
+        const user = await this.findOne({email});
 
         if (user && await user.validatePassword(password)) {
             const userResponse = new AuthSignInDtoResponse();

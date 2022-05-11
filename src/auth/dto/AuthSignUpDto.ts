@@ -9,7 +9,8 @@ export class AuthSignUpDto {
     email: string;
     @IsNotEmpty()
     password: string;
-    role: UserRoleEnum;
+    @IsNotEmpty()
+    role: string;
 
 
 }

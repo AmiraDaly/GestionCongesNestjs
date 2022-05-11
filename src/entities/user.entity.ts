@@ -40,11 +40,7 @@ export class User extends BaseEntity{
 
     // @OneToMany(() => Conges, (conges) => conges.user, {}) ;
 
-    @Column({
-        type: 'enum',
-        enum: UserRoleEnum,
-        default: UserRoleEnum.user,
-    })
+    @Column()
     role: UserRoleEnum;
     @OneToMany(() => Conges, conges => conges.user)
     conges: Conges[];
